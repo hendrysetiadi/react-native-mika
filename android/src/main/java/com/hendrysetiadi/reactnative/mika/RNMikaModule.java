@@ -53,6 +53,7 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
         return constants;
     }
 
+
     @Override
     public void initialize() {
         super.initialize();
@@ -65,6 +66,104 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
         getReactApplicationContext().removeActivityEventListener(this);
     }
 
+
+    @Override
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+        Promise promise = mPromises.get(requestCode);
+        if (promise != null) {
+            WritableMap result = new WritableNativeMap();
+            result.putInt("resultCode", resultCode);
+            if (data != null && data.getExtras() != null) {
+                // result.putMap("data", Arguments.makeNativeMap(data.getExtras()));
+                result.putMap("data", Arguments.fromBundle(data.getExtras()));
+            }
+            promise.resolve(result);
+        }
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        // Do Nothing
+    }
+
+
+    /**
+     * @param requestCode   Request Code: Random Number
+     * @param username      MIKA Account Username
+     * @param password      MIKA Account Password
+     * @param acquirerId    MIKA Payment Channel Acquirer ID
+     * @param amount        Amount to Charge
+     * @param promise
+     */
+    @ReactMethod
+    public void startMikaPayment(
+        int requestCode,
+        String username,
+        String password,
+        String acquirerId,
+        int amount,
+        Promise promise
+    ) {
+        Activity activity = getCurrentActivity();
+        Intent intent = new Intent(MIKA_PAYMENT_PACKAGE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("PASSWORD", password);
+        intent.putExtra("ACQUIRER_ID", acquirerId);
+        intent.putExtra("AMOUNT", amount);
+
+        activity.startActivityForResult(intent, requestCode);
+        mPromises.put(requestCode, promise);
+    }
+
+    /**
+     * @param requestCode   Request Code: Random Number
+     * @param username      MIKA Account Username
+     * @param password      MIKA Account Password
+     * @param transactionId MIKA Payment Transaction ID
+     * @param copyId        Receipt Copy ID: 1 = Customer Copy, 2 = Merchant Copy, and 3 = Bank Copy
+     * @param promise
+     */
+    @ReactMethod
+    public void startMikaPrint(
+        int requestCode,
+        String username,
+        String password,
+        String transactionId,
+        int copyId,
+        Promise promise
+    ) {
+        Activity activity = getCurrentActivity();
+        Intent intent = new Intent(MIKA_PRINT_PACKAGE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("PASSWORD", password);
+        intent.putExtra("TRANSACTION_ID", transactionId);
+        intent.putExtra("COPY_ID", copyId);
+
+        activity.startActivityForResult(intent, requestCode);
+        mPromises.put(requestCode, promise);
+    }
+
+    /**
+     * @param requestCode   Request Code: Random Number
+     * @param username      MIKA Account Username
+     * @param password      MIKA Account Password
+     * @param promise
+     */
+    @ReactMethod
+    public void startMikaSettlement(
+        int requestCode,
+        String username,
+        String password,
+        Promise promise
+    ) {
+        Activity activity = getCurrentActivity();
+        Intent intent = new Intent(MIKA_SETTLEMENT_PACKAGE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("PASSWORD", password);
+
+        activity.startActivityForResult(intent, requestCode);
+        mPromises.put(requestCode, promise);
+    }
 
 
     /* @ReactMethod
@@ -108,93 +207,4 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
         activity.setResult(result, intent);
         activity.finish();
     } */
-
-
-
-    /**
-     *
-     * @param requestCode   Request Code: Random Number
-     * @param username      MIKA Account Username
-     * @param password      MIKA Account Password
-     * @param acquirerId    MIKA Payment Channel Acquirer ID
-     * @param amount        Amount to Charge: Must be Integer
-     * @param promise
-     */
-    @ReactMethod
-    public void startMikaPayment(
-        int requestCode,
-        String username,
-        String password,
-        String acquirerId,
-        int amount,
-        Promise promise
-    ) {
-        // Activity activity = getReactApplicationContext().getCurrentActivity();
-        // Intent intent = new Intent(action);
-        // intent.putExtras(Arguments.toBundle(data));
-
-        Activity activity = getCurrentActivity();
-        Intent intent = new Intent(MIKA_PAYMENT_PACKAGE);
-        intent.putExtra("USERNAME", username);
-        intent.putExtra("PASSWORD", password);
-        intent.putExtra("AMOUNT", amount);
-        intent.putExtra("ACQUIRER_ID", acquirerId);
-
-        activity.startActivityForResult(intent, requestCode);
-        mPromises.put(requestCode, promise);
-    }
-
-    /* @ReactMethod
-    public void startMikaSettlementActivityForResult(
-            int requestCode,
-            String action,
-            String username,
-            String password,
-            Promise promise
-    ) {
-        Activity activity = getReactApplicationContext().getCurrentActivity();
-        Intent intent = new Intent(action);
-        intent.putExtra("USERNAME", username);
-        intent.putExtra("PASSWORD", password);
-
-        activity.startActivityForResult(intent, requestCode);
-        mPromises.put(requestCode, promise);
-    }
-
-    @ReactMethod
-    public void startMikaPrintActivityForResult(
-            int requestCode,
-            String action,
-            String username,
-            String password,
-            String transactionId,
-            int copyId,
-            Promise promise
-    ) {
-        Activity activity = getReactApplicationContext().getCurrentActivity();
-        Intent intent = new Intent(action);
-        intent.putExtra("USERNAME", username);
-        intent.putExtra("PASSWORD", password);
-        intent.putExtra("TRANSACTION_ID", transactionId);
-        intent.putExtra("COPY_ID", copyId);
-
-        activity.startActivityForResult(intent, requestCode);
-        mPromises.put(requestCode, promise);
-    } */
-
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Promise promise = mPromises.get(requestCode);
-        if (promise != null) {
-            WritableMap result = new WritableNativeMap();
-            result.putInt("resultCode", resultCode);
-            if (data != null && data.getExtras() != null) {
-                // result.putMap("data", Arguments.makeNativeMap(data.getExtras()));
-                result.putMap("data", Arguments.fromBundle(data.getExtras()));
-            }
-            promise.resolve(result);
-        }
-    }
 }
