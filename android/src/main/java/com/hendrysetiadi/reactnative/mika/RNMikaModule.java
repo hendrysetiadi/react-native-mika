@@ -74,7 +74,6 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
             WritableMap result = new WritableNativeMap();
             result.putInt("resultCode", resultCode);
             if (data != null && data.getExtras() != null) {
-                // result.putMap("data", Arguments.makeNativeMap(data.getExtras()));
                 result.putMap("data", Arguments.fromBundle(data.getExtras()));
             }
             promise.resolve(result);
@@ -84,6 +83,23 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
     @Override
     public void onNewIntent(Intent intent) {
         // Do Nothing
+    }
+
+
+    @ReactMethod
+    public void resolveMikaActivity(Promise promise) {
+        Activity activity = getCurrentActivity();
+        Intent intent = new Intent(MIKA_PAYMENT_PACKAGE);
+        ComponentName componentName = intent.resolveActivity(activity.getPackageManager());
+        if (componentName == null) {
+            promise.resolve(null);
+            return;
+        }
+
+        WritableMap map = new WritableNativeMap();
+        map.putString("class", componentName.getClassName());
+        map.putString("package", componentName.getPackageName());
+        promise.resolve(map);
     }
 
 
@@ -181,22 +197,6 @@ public class RNMikaModule extends ReactContextBaseJavaModule implements Activity
         intent.putExtras(Arguments.toBundle(data));
         activity.startActivityForResult(intent, requestCode);
         mPromises.put(requestCode, promise);
-    }
-
-    @ReactMethod
-    public void resolveActivity(String action, Promise promise) {
-        Activity activity = getReactApplicationContext().getCurrentActivity();
-        Intent intent = new Intent(action);
-        ComponentName componentName = intent.resolveActivity(activity.getPackageManager());
-        if (componentName == null) {
-            promise.resolve(null);
-            return;
-        }
-
-        WritableMap map = new WritableNativeMap();
-        map.putString("class", componentName.getClassName());
-        map.putString("package", componentName.getPackageName());
-        promise.resolve(map);
     }
 
     @ReactMethod

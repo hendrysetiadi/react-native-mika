@@ -12,7 +12,18 @@
     "payment",
     "payment-gateway"
   ],
-  "author": "Hendry Setiadi",
+  "author": {
+    "name": "Hendry Setiadi",
+    "email": "hendrysetiadi.hs@gmail.com"
+  },
+  "homepage": "https://github.com/hendrysetiadi/react-native-mika",
+  "bugs": {
+    "url": "https://github.com/hendrysetiadi/react-native-mika/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hendrysetiadi/react-native-mika.git"
+  },
   "license": "MIT",
   "peerDependencies": {
     "react-native": "*"
