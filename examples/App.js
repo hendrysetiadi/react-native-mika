@@ -16,6 +16,8 @@ import {
   TextInput,
   Button,
   Text,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import MIKA from 'react-native-mika';
 
@@ -23,12 +25,33 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'malawang',
-      password: 'IzlyRIIG6I',
-      acquirerId: '50',
+      username: 'sbipos1',
+      password: 'sdJgD2TL',
+      acquirerId: '3004',
       amount: '',
       paymentReturn: '',
     };
+  }
+
+  componentDidMount = () => {
+    this.checkMikaPackage();
+  }
+
+  checkMikaPackage = async () => {
+    // Check if MIKA is available for Payment
+    const mikaActivity = await MIKA.resolveMikaActivity();
+    if (!mikaActivity) {
+      Alert.alert(
+        'MIKA Not Found',
+        'Please install MIKA Apps first to proceed with the demo',
+        [{
+          text: 'Ok',
+          onPress: () => BackHandler.exitApp(),
+        }],
+        { cancelable: false },
+      );
+      return;
+    }
   }
 
   onPressSubmitPayment = async () => {
